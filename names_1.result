@@ -1,0 +1,22 @@
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1.42..128498.06 rows=30 width=2139) (actual time=385220.668..385220.668 rows=0 loops=1)
+   ->  Nested Loop Left Join  (cost=1.42..79085395.42 rows=18464 width=2139) (actual time=385220.666..385220.666 rows=0 loops=1)
+         ->  Nested Loop Left Join  (cost=1.00..79003680.47 rows=18464 width=1814) (actual time=385220.666..385220.666 rows=0 loops=1)
+               ->  Merge Append  (cost=0.58..78921965.51 rows=18464 width=1489) (actual time=385220.664..385220.664 rows=0 loops=1)
+                     Sort Key: fec_fitem_sched_a.contb_receipt_dt DESC, fec_fitem_sched_a.sub_id DESC
+                     ->  Sort  (cost=0.01..0.02 rows=1 width=5691) (actual time=0.015..0.015 rows=0 loops=1)
+                           Sort Key: fec_fitem_sched_a.contb_receipt_dt DESC, fec_fitem_sched_a.sub_id DESC
+                           Sort Method: quicksort  Memory: 25kB
+                           ->  Seq Scan on fec_fitem_sched_a  (cost=0.00..0.00 rows=1 width=5691) (actual time=0.009..0.009 rows=0 loops=1)
+                                 Filter: (is_individual AND (two_year_transaction_period = '2018'::numeric) AND ((contributor_name_text @@ to_tsquery('Vavic'::text)) OR (contributor_name_text @@ to_tsquery('Vandemoer'::text))))
+                     ->  Index Scan Backward using idx_sched_a_2017_2018_two_year_period_dt_sub_id on fec_fitem_sched_a_2017_2018  (cost=0.56..78921734.68 rows=18463 width=1489) (actual time=385220.647..385220.647 rows=0 loops=1)
+                           Index Cond: (two_year_transaction_period = '2018'::numeric)
+                           Filter: (is_individual AND ((contributor_name_text @@ to_tsquery('Vavic'::text)) OR (contributor_name_text @@ to_tsquery('Vandemoer'::text))))
+                           Rows Removed by Filter: 88436963
+               ->  Index Scan using ofec_committee_history_mv_tmp_cycle_committee_id_idx on ofec_committee_history_mv ofec_committee_history_mv_1  (cost=0.42..4.42 rows=1 width=325) (never executed)
+                     Index Cond: ((fec_fitem_sched_a.two_year_transaction_period = cycle) AND (cycle = '2018'::numeric) AND ((fec_fitem_sched_a.cmte_id)::text = (committee_id)::text))
+         ->  Index Scan using ofec_committee_history_mv_tmp_cycle_committee_id_idx on ofec_committee_history_mv ofec_committee_history_mv_2  (cost=0.42..4.42 rows=1 width=325) (never executed)
+               Index Cond: ((fec_fitem_sched_a.two_year_transaction_period = cycle) AND (cycle = '2018'::numeric) AND ((fec_fitem_sched_a.clean_contbr_id)::text = (committee_id)::text))
+ Planning time: 28.286 ms
+ Execution time: 385220.995 ms
+(20 rows)

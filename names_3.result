@@ -1,0 +1,32 @@
+                                                                                                    QUERY PLAN                                                                                                     
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=96467.66..96467.73 rows=30 width=2139) (actual time=0.110..0.110 rows=0 loops=1)
+   ->  Sort  (cost=96467.66..96490.74 rows=9233 width=2139) (actual time=0.107..0.107 rows=0 loops=1)
+         Sort Key: fec_fitem_sched_a.contb_receipt_dt DESC, fec_fitem_sched_a.sub_id DESC
+         Sort Method: quicksort  Memory: 25kB
+         ->  Hash Left Join  (cost=50497.04..96194.97 rows=9233 width=2139) (actual time=0.083..0.083 rows=0 loops=1)
+               Hash Cond: ((fec_fitem_sched_a.two_year_transaction_period = ofec_committee_history_mv_2.cycle) AND ((fec_fitem_sched_a.clean_contbr_id)::text = (ofec_committee_history_mv_2.committee_id)::text))
+               ->  Hash Left Join  (cost=25248.52..69033.06 rows=9233 width=1814) (actual time=0.082..0.082 rows=0 loops=1)
+                     Hash Cond: ((fec_fitem_sched_a.two_year_transaction_period = ofec_committee_history_mv_1.cycle) AND ((fec_fitem_sched_a.cmte_id)::text = (ofec_committee_history_mv_1.committee_id)::text))
+                     ->  Append  (cost=0.00..41871.15 rows=9233 width=1489) (actual time=0.082..0.082 rows=0 loops=1)
+                           ->  Seq Scan on fec_fitem_sched_a  (cost=0.00..0.00 rows=1 width=5691) (actual time=0.008..0.008 rows=0 loops=1)
+                                 Filter: (is_individual AND (two_year_transaction_period = '2018'::numeric) AND (contributor_name_text @@ to_tsquery('Vavic'::text)))
+                           ->  Bitmap Heap Scan on fec_fitem_sched_a_2017_2018  (cost=133.86..41871.15 rows=9232 width=1489) (actual time=0.073..0.073 rows=0 loops=1)
+                                 Recheck Cond: (contributor_name_text @@ to_tsquery('Vavic'::text))
+                                 Filter: (is_individual AND (two_year_transaction_period = '2018'::numeric))
+                                 ->  Bitmap Index Scan on idx_sched_a_2017_2018_contrib_name_text_dt_sub_id  (cost=0.00..131.56 rows=10041 width=0) (actual time=0.071..0.071 rows=0 loops=1)
+                                       Index Cond: (contributor_name_text @@ to_tsquery('Vavic'::text))
+                     ->  Hash  (cost=24962.09..24962.09 rows=19095 width=325) (never executed)
+                           ->  Bitmap Heap Scan on ofec_committee_history_mv ofec_committee_history_mv_1  (cost=904.41..24962.09 rows=19095 width=325) (never executed)
+                                 Recheck Cond: (cycle = '2018'::numeric)
+                                 ->  Bitmap Index Scan on ofec_committee_history_mv_tmp_cycle_committee_id_idx  (cost=0.00..899.63 rows=19095 width=0) (never executed)
+                                       Index Cond: (cycle = '2018'::numeric)
+               ->  Hash  (cost=24962.09..24962.09 rows=19095 width=325) (never executed)
+                     ->  Bitmap Heap Scan on ofec_committee_history_mv ofec_committee_history_mv_2  (cost=904.41..24962.09 rows=19095 width=325) (never executed)
+                           Recheck Cond: (cycle = '2018'::numeric)
+                           ->  Bitmap Index Scan on ofec_committee_history_mv_tmp_cycle_committee_id_idx  (cost=0.00..899.63 rows=19095 width=0) (never executed)
+                                 Index Cond: (cycle = '2018'::numeric)
+ Planning time: 41.203 ms
+ Execution time: 0.865 ms
+(28 rows)
+
